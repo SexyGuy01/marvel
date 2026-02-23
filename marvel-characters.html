@@ -1,0 +1,1417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MARVEL — Characters</title>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #E62429;
+    --dark-red: #8B0000;
+    --black: #0a0a0a;
+    --dark: #111;
+    --mid: #1a1a1a;
+    --light: #f0f0f0;
+    --gold: #FFD700;
+    --silver: #C0C0C0;
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--black);
+    color: var(--light);
+    font-family: 'Barlow', sans-serif;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom cursor */
+  .cursor {
+    position: fixed;
+    width: 12px; height: 12px;
+    background: var(--red);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.1s;
+    mix-blend-mode: difference;
+  }
+  .cursor-ring {
+    position: fixed;
+    width: 36px; height: 36px;
+    border: 1.5px solid var(--red);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    transition: all 0.15s ease;
+    opacity: 0.6;
+  }
+
+  /* Noise overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9997;
+    opacity: 0.4;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 48px;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, transparent 100%);
+    backdrop-filter: blur(0px);
+  }
+
+  .nav-logo {
+    font-family: 'Anton', sans-serif;
+    font-size: 28px;
+    letter-spacing: 4px;
+    color: var(--red);
+    text-shadow: 0 0 30px rgba(230,36,41,0.6);
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 36px;
+    list-style: none;
+  }
+  .nav-links a {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.6);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--red); }
+
+  /* HERO */
+  .hero {
+    height: 100vh;
+    position: relative;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse 80% 60% at 70% 50%, rgba(139,0,0,0.25) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 20% 80%, rgba(230,36,41,0.1) 0%, transparent 60%),
+      var(--black);
+  }
+
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image: 
+      linear-gradient(rgba(230,36,41,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(230,36,41,0.06) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 0%, transparent 100%);
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    padding: 0 80px;
+    max-width: 800px;
+  }
+
+  .hero-eyebrow {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 20px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.2s forwards;
+  }
+
+  .hero-title {
+    font-family: 'Anton', sans-serif;
+    font-size: clamp(80px, 12vw, 160px);
+    line-height: 0.9;
+    letter-spacing: -2px;
+    margin-bottom: 30px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.4s forwards;
+  }
+
+  .hero-title span {
+    display: block;
+    -webkit-text-stroke: 2px var(--red);
+    color: transparent;
+  }
+
+  .hero-sub {
+    font-size: 16px;
+    font-weight: 300;
+    line-height: 1.7;
+    color: rgba(255,255,255,0.55);
+    max-width: 480px;
+    margin-bottom: 48px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.6s forwards;
+  }
+
+  .hero-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--black);
+    background: var(--red);
+    padding: 16px 36px;
+    text-decoration: none;
+    transition: all 0.25s;
+    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 100%, 12px 100%);
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.8s forwards;
+  }
+  .hero-cta:hover {
+    background: #fff;
+    transform: translateY(-2px);
+  }
+
+  .hero-number {
+    position: absolute;
+    right: 80px;
+    bottom: 60px;
+    font-family: 'Anton', sans-serif;
+    font-size: 200px;
+    color: rgba(230,36,41,0.05);
+    letter-spacing: -10px;
+    line-height: 1;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* SCROLL INDICATOR */
+  .scroll-hint {
+    position: absolute;
+    bottom: 40px;
+    left: 80px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.3);
+    opacity: 0;
+    animation: fadeUp 0.8s ease 1s forwards;
+  }
+  .scroll-hint::before {
+    content: '';
+    width: 40px; height: 1px;
+    background: rgba(255,255,255,0.2);
+  }
+
+  /* SECTION DIVIDER */
+  .section-divider {
+    padding: 0 80px;
+    margin: 80px 0 60px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+  .section-divider h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px;
+    letter-spacing: 4px;
+    white-space: nowrap;
+  }
+  .divider-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, rgba(230,36,41,0.5), transparent);
+  }
+  .divider-tag {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--red);
+    border: 1px solid var(--red);
+    padding: 4px 12px;
+  }
+
+  /* FEATURED HERO */
+  .featured-section {
+    padding: 0 80px 100px;
+  }
+
+  .featured-card {
+    position: relative;
+    height: 580px;
+    overflow: hidden;
+    background: var(--dark);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .featured-visual {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .featured-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: grayscale(20%) contrast(1.1);
+    transition: transform 0.6s ease;
+  }
+  .featured-card:hover .featured-img { transform: scale(1.04); }
+
+  .featured-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to right, transparent 40%, var(--dark) 100%);
+  }
+
+  .featured-badge {
+    position: absolute;
+    top: 28px; left: 28px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    background: var(--red);
+    color: white;
+    padding: 5px 14px;
+  }
+
+  .featured-info {
+    padding: 60px 60px 60px 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .featured-team {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 16px;
+  }
+
+  .featured-name {
+    font-family: 'Anton', sans-serif;
+    font-size: 72px;
+    line-height: 0.9;
+    margin-bottom: 8px;
+  }
+
+  .featured-alias {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px;
+    font-weight: 300;
+    letter-spacing: 2px;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 28px;
+  }
+
+  .featured-desc {
+    font-size: 14px;
+    line-height: 1.8;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 40px;
+    max-width: 360px;
+  }
+
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 40px;
+  }
+
+  .stat-item {}
+  .stat-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    color: var(--red);
+    line-height: 1;
+  }
+  .stat-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.35);
+    margin-top: 4px;
+  }
+
+  /* POWER BARS */
+  .power-bars { display: flex; flex-direction: column; gap: 10px; margin-bottom: 32px; }
+  .power-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .power-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    width: 80px;
+    flex-shrink: 0;
+  }
+  .power-track {
+    flex: 1;
+    height: 3px;
+    background: rgba(255,255,255,0.1);
+    position: relative;
+    overflow: hidden;
+  }
+  .power-fill {
+    height: 100%;
+    background: linear-gradient(to right, var(--red), #ff6b6b);
+    transform-origin: left;
+    animation: growBar 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    transform: scaleX(0);
+  }
+
+  @keyframes growBar {
+    to { transform: scaleX(1); }
+  }
+
+  .power-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    color: rgba(255,255,255,0.7);
+    width: 30px;
+    text-align: right;
+  }
+
+  /* CHARACTERS GRID */
+  .characters-section {
+    padding: 0 80px 120px;
+  }
+
+  .filter-bar {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 48px;
+    flex-wrap: wrap;
+  }
+
+  .filter-btn {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 10px 20px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: transparent;
+    color: rgba(255,255,255,0.4);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .filter-btn:hover, .filter-btn.active {
+    background: var(--red);
+    border-color: var(--red);
+    color: white;
+  }
+
+  .characters-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+  }
+
+  .char-card {
+    position: relative;
+    aspect-ratio: 3/4;
+    overflow: hidden;
+    background: var(--dark);
+    cursor: pointer;
+    transition: transform 0.3s ease;
+  }
+
+  .char-card:hover { transform: scale(1.02); z-index: 10; }
+
+  .char-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
+    filter: grayscale(30%);
+    transition: filter 0.4s, transform 0.5s;
+  }
+  .char-card:hover .char-img {
+    filter: grayscale(0%) brightness(1.1);
+    transform: scale(1.06);
+  }
+
+  .char-gradient {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.3) 40%, transparent 70%);
+    transition: opacity 0.3s;
+  }
+
+  .char-side-accent {
+    position: absolute;
+    top: 0; bottom: 0;
+    left: 0;
+    width: 3px;
+    background: var(--red);
+    transform: scaleY(0);
+    transform-origin: bottom;
+    transition: transform 0.3s ease;
+  }
+  .char-card:hover .char-side-accent { transform: scaleY(1); }
+
+  .char-info {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 20px 20px 24px;
+    transform: translateY(8px);
+    transition: transform 0.3s;
+  }
+  .char-card:hover .char-info { transform: translateY(0); }
+
+  .char-team-tag {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 6px;
+  }
+
+  .char-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px;
+    letter-spacing: 2px;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .char-alias {
+    font-size: 11px;
+    font-weight: 300;
+    color: rgba(255,255,255,0.45);
+    letter-spacing: 1px;
+  }
+
+  .char-power-peek {
+    margin-top: 12px;
+    display: flex;
+    gap: 4px;
+    opacity: 0;
+    transition: opacity 0.3s 0.05s;
+  }
+  .char-card:hover .char-power-peek { opacity: 1; }
+
+  .power-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--red);
+  }
+  .power-dot.empty { background: rgba(255,255,255,0.15); }
+
+  .char-number {
+    position: absolute;
+    top: 16px; right: 16px;
+    font-family: 'Anton', sans-serif;
+    font-size: 64px;
+    color: rgba(255,255,255,0.04);
+    line-height: 1;
+    pointer-events: none;
+    transition: color 0.3s;
+  }
+  .char-card:hover .char-number { color: rgba(230,36,41,0.08); }
+
+  /* TICKER */
+  .ticker {
+    background: var(--red);
+    overflow: hidden;
+    white-space: nowrap;
+    padding: 12px 0;
+    margin: 60px 0;
+  }
+  .ticker-inner {
+    display: inline-flex;
+    animation: tickerAnim 30s linear infinite;
+  }
+  .ticker-item {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 4px;
+    padding: 0 40px;
+    color: rgba(0,0,0,0.6);
+  }
+  .ticker-item span { color: rgba(0,0,0,0.3); margin: 0 8px; }
+
+  @keyframes tickerAnim {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  /* VILLAIN SECTION */
+  .villains-section {
+    padding: 0 80px 120px;
+  }
+
+  .villain-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 2px;
+  }
+
+  .villain-card {
+    position: relative;
+    height: 460px;
+    overflow: hidden;
+    background: var(--dark);
+    cursor: pointer;
+  }
+
+  .villain-card:first-child {
+    grid-row: span 2;
+    height: 100%;
+  }
+
+  .villain-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
+    filter: grayscale(60%) sepia(20%);
+    transition: filter 0.4s, transform 0.5s;
+  }
+  .villain-card:hover .villain-img {
+    filter: grayscale(0%) sepia(0%);
+    transform: scale(1.05);
+  }
+
+  .villain-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.1) 60%);
+  }
+
+  .villain-info {
+    position: absolute;
+    bottom: 24px;
+    left: 24px; right: 24px;
+  }
+  .villain-tag {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: #999;
+    margin-bottom: 6px;
+  }
+  .villain-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    letter-spacing: 2px;
+    line-height: 1;
+    color: white;
+    text-shadow: 0 2px 20px rgba(0,0,0,0.8);
+  }
+
+  /* TEAMS SECTION */
+  .teams-section {
+    padding: 0 80px 120px;
+  }
+
+  .teams-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+  }
+
+  .team-card {
+    padding: 48px 40px;
+    background: var(--dark);
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  .team-card:hover { background: #1f1f1f; }
+
+  .team-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--red);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s;
+  }
+  .team-card:hover::after { transform: scaleX(1); }
+
+  .team-icon {
+    font-size: 48px;
+    margin-bottom: 20px;
+    display: block;
+  }
+
+  .team-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    letter-spacing: 3px;
+    margin-bottom: 12px;
+  }
+
+  .team-desc {
+    font-size: 13px;
+    line-height: 1.7;
+    color: rgba(255,255,255,0.45);
+    margin-bottom: 24px;
+  }
+
+  .team-members {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .member-chip {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.4);
+    transition: all 0.2s;
+  }
+  .team-card:hover .member-chip {
+    border-color: rgba(230,36,41,0.3);
+    color: rgba(255,255,255,0.6);
+  }
+
+  /* FOOTER */
+  footer {
+    padding: 60px 80px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 40px;
+  }
+
+  .footer-logo {
+    font-family: 'Anton', sans-serif;
+    font-size: 48px;
+    color: var(--red);
+    letter-spacing: 4px;
+    text-shadow: 0 0 60px rgba(230,36,41,0.3);
+    margin-bottom: 16px;
+  }
+
+  .footer-tagline {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.2);
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 32px;
+    list-style: none;
+  }
+  .footer-links a {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.25);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .footer-links a:hover { color: var(--red); }
+
+  .footer-bottom {
+    padding: 20px 80px;
+    text-align: center;
+    font-size: 11px;
+    color: rgba(255,255,255,0.1);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* MODAL */
+  .modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(0,0,0,0.95);
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+  }
+  .modal.open { display: flex; }
+
+  .modal-content {
+    max-width: 900px;
+    width: 90%;
+    background: var(--dark);
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    position: relative;
+    animation: fadeUp 0.4s ease;
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 20px; right: 20px;
+    width: 40px; height: 40px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+    transition: background 0.2s;
+  }
+  .modal-close:hover { background: var(--red); }
+
+  .modal-img-wrap {
+    position: relative;
+    overflow: hidden;
+    height: 500px;
+  }
+  .modal-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
+  }
+  .modal-img-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to right, transparent 50%, var(--dark) 100%);
+  }
+
+  .modal-info {
+    padding: 48px 40px;
+    overflow-y: auto;
+  }
+
+  .modal-team {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 12px;
+  }
+
+  .modal-name {
+    font-family: 'Anton', sans-serif;
+    font-size: 56px;
+    line-height: 0.9;
+    margin-bottom: 6px;
+  }
+
+  .modal-alias {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 24px;
+    letter-spacing: 2px;
+  }
+
+  .modal-bio {
+    font-size: 13px;
+    line-height: 1.8;
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 32px;
+  }
+
+  .modal-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+
+  .modal-stat {
+    background: rgba(255,255,255,0.03);
+    padding: 16px;
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .modal-stat-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 30px;
+    color: var(--red);
+    line-height: 1;
+  }
+
+  .modal-stat-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.3);
+    margin-top: 4px;
+  }
+
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .characters-grid { grid-template-columns: repeat(3, 1fr); }
+    nav, .hero-content, .section-divider, .featured-section,
+    .characters-section, .villains-section, .teams-section, footer, .footer-bottom {
+      padding-left: 40px;
+      padding-right: 40px;
+    }
+    .hero-content { padding-left: 40px; }
+    .hero-number { right: 40px; font-size: 140px; }
+  }
+
+  @media (max-width: 768px) {
+    .characters-grid { grid-template-columns: repeat(2, 1fr); }
+    .teams-grid { grid-template-columns: 1fr; }
+    .featured-card { grid-template-columns: 1fr; height: auto; }
+    .featured-visual { height: 320px; }
+    .villain-grid { grid-template-columns: 1fr; }
+    .villain-card:first-child { grid-row: auto; height: 460px; }
+    .hero-title { font-size: 64px; }
+    nav { padding: 16px 24px; }
+    .nav-links { display: none; }
+    .modal-content { grid-template-columns: 1fr; }
+    .modal-img-wrap { height: 260px; }
+    nav, .hero-content, .section-divider, .featured-section,
+    .characters-section, .villains-section, .teams-section, footer, .footer-bottom {
+      padding-left: 24px;
+      padding-right: 24px;
+    }
+    .hero-content { padding-left: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">MARVEL</div>
+  <ul class="nav-links">
+    <li><a href="#heroes">Heroes</a></li>
+    <li><a href="#villains">Villains</a></li>
+    <li><a href="#teams">Teams</a></li>
+    <li><a href="#">Comics</a></li>
+  </ul>
+</nav>
+
+<!-- HERO SECTION -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <p class="hero-eyebrow">Marvel Universe — Character Compendium</p>
+    <h1 class="hero-title">
+      MARVEL
+      <span>HEROES</span>
+    </h1>
+    <p class="hero-sub">Explore the extraordinary beings who stand between humanity and total annihilation. From the streets of New York to the farthest reaches of the cosmos.</p>
+    <a href="#heroes" class="hero-cta">Explore Characters</a>
+  </div>
+  <div class="hero-number">616</div>
+  <div class="scroll-hint">Scroll to discover</div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-inner">
+    <span class="ticker-item">IRON MAN <span>✦</span></span>
+    <span class="ticker-item">CAPTAIN AMERICA <span>✦</span></span>
+    <span class="ticker-item">THOR <span>✦</span></span>
+    <span class="ticker-item">BLACK WIDOW <span>✦</span></span>
+    <span class="ticker-item">SPIDER-MAN <span>✦</span></span>
+    <span class="ticker-item">DOCTOR STRANGE <span>✦</span></span>
+    <span class="ticker-item">BLACK PANTHER <span>✦</span></span>
+    <span class="ticker-item">WOLVERINE <span>✦</span></span>
+    <span class="ticker-item">HULK <span>✦</span></span>
+    <span class="ticker-item">SCARLET WITCH <span>✦</span></span>
+    <!-- Repeat for infinite effect -->
+    <span class="ticker-item">IRON MAN <span>✦</span></span>
+    <span class="ticker-item">CAPTAIN AMERICA <span>✦</span></span>
+    <span class="ticker-item">THOR <span>✦</span></span>
+    <span class="ticker-item">BLACK WIDOW <span>✦</span></span>
+    <span class="ticker-item">SPIDER-MAN <span>✦</span></span>
+    <span class="ticker-item">DOCTOR STRANGE <span>✦</span></span>
+    <span class="ticker-item">BLACK PANTHER <span>✦</span></span>
+    <span class="ticker-item">WOLVERINE <span>✦</span></span>
+    <span class="ticker-item">HULK <span>✦</span></span>
+    <span class="ticker-item">SCARLET WITCH <span>✦</span></span>
+  </div>
+</div>
+
+<!-- FEATURED -->
+<div class="section-divider">
+  <h2>Featured Hero</h2>
+  <div class="divider-line"></div>
+  <div class="divider-tag">Spotlight</div>
+</div>
+
+<section class="featured-section">
+  <div class="featured-card">
+    <div class="featured-visual">
+      <img class="featured-img" src="https://i.annihil.us/u/prod/marvel/i/mg/9/c0/527bb7b37ff55.jpg" alt="Iron Man" onerror="this.src='https://via.placeholder.com/600x580/1a1a1a/333333?text=IRON+MAN'">
+      <div class="featured-overlay"></div>
+      <div class="featured-badge">Featured</div>
+    </div>
+    <div class="featured-info">
+      <div class="featured-team">The Avengers</div>
+      <div class="featured-name">IRON MAN</div>
+      <div class="featured-alias">Tony Stark</div>
+      <p class="featured-desc">Genius. Billionaire. Playboy. Philanthropist. Tony Stark built an armored suit in a cave — then kept building. The Iron Man armor has become a symbol of human ingenuity weaponized against cosmic threats.</p>
+      
+      <div class="stats-row">
+        <div class="stat-item">
+          <div class="stat-val">7+</div>
+          <div class="stat-label">Armor Versions</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-val">IQ 270</div>
+          <div class="stat-label">Intelligence</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-val">3T+</div>
+          <div class="stat-label">Net Worth</div>
+        </div>
+      </div>
+
+      <div class="power-bars">
+        <div class="power-row">
+          <span class="power-name">Intelligence</span>
+          <div class="power-track"><div class="power-fill" style="width:95%;animation-delay:0.1s"></div></div>
+          <span class="power-val">95</span>
+        </div>
+        <div class="power-row">
+          <span class="power-name">Strength</span>
+          <div class="power-track"><div class="power-fill" style="width:85%;animation-delay:0.2s"></div></div>
+          <span class="power-val">85</span>
+        </div>
+        <div class="power-row">
+          <span class="power-name">Speed</span>
+          <div class="power-track"><div class="power-fill" style="width:80%;animation-delay:0.3s"></div></div>
+          <span class="power-val">80</span>
+        </div>
+        <div class="power-row">
+          <span class="power-name">Durability</span>
+          <div class="power-track"><div class="power-fill" style="width:90%;animation-delay:0.4s"></div></div>
+          <span class="power-val">90</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HEROES GRID -->
+<div class="section-divider" id="heroes">
+  <h2>Roster</h2>
+  <div class="divider-line"></div>
+  <div class="divider-tag">616 Universe</div>
+</div>
+
+<section class="characters-section">
+  <div class="filter-bar">
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="avengers">Avengers</button>
+    <button class="filter-btn" data-filter="x-men">X-Men</button>
+    <button class="filter-btn" data-filter="guardians">Guardians</button>
+    <button class="filter-btn" data-filter="solo">Solo</button>
+  </div>
+
+  <div class="characters-grid" id="heroesGrid">
+    <!-- Populated by JS -->
+  </div>
+</section>
+
+<!-- VILLAINS -->
+<div class="section-divider" id="villains">
+  <h2>Villains</h2>
+  <div class="divider-line"></div>
+  <div class="divider-tag">Threats</div>
+</div>
+
+<section class="villains-section">
+  <div class="villain-grid">
+    <div class="villain-card">
+      <img class="villain-img" src="https://i.annihil.us/u/prod/marvel/i/mg/f/00/5265079f2e05e.jpg" alt="Thanos" onerror="this.src='https://via.placeholder.com/400x920/1a1a1a/333?text=THANOS'">
+      <div class="villain-overlay"></div>
+      <div class="villain-info">
+        <div class="villain-tag">Cosmic Threat</div>
+        <div class="villain-name">THANOS</div>
+      </div>
+    </div>
+    <div class="villain-card">
+      <img class="villain-img" src="https://i.annihil.us/u/prod/marvel/i/mg/3/90/526548a343e4b.jpg" alt="Loki" onerror="this.src='https://via.placeholder.com/400x460/1a1a1a/333?text=LOKI'">
+      <div class="villain-overlay"></div>
+      <div class="villain-info">
+        <div class="villain-tag">Asgardian Trickster</div>
+        <div class="villain-name">LOKI</div>
+      </div>
+    </div>
+    <div class="villain-card">
+      <img class="villain-img" src="https://i.annihil.us/u/prod/marvel/i/mg/3/50/526548e4b3e7e.jpg" alt="Red Skull" onerror="this.src='https://via.placeholder.com/400x460/1a1a1a/333?text=RED+SKULL'">
+      <div class="villain-overlay"></div>
+      <div class="villain-info">
+        <div class="villain-tag">Hydra Supreme</div>
+        <div class="villain-name">RED SKULL</div>
+      </div>
+    </div>
+    <div class="villain-card">
+      <img class="villain-img" src="https://i.annihil.us/u/prod/marvel/i/mg/3/70/526548d71e2e9.jpg" alt="Ultron" onerror="this.src='https://via.placeholder.com/400x460/1a1a1a/333?text=ULTRON'">
+      <div class="villain-overlay"></div>
+      <div class="villain-info">
+        <div class="villain-tag">AI Menace</div>
+        <div class="villain-name">ULTRON</div>
+      </div>
+    </div>
+    <div class="villain-card">
+      <img class="villain-img" src="https://i.annihil.us/u/prod/marvel/i/mg/6/60/526548e5f7c35.jpg" alt="Magneto" onerror="this.src='https://via.placeholder.com/400x460/1a1a1a/333?text=MAGNETO'">
+      <div class="villain-overlay"></div>
+      <div class="villain-info">
+        <div class="villain-tag">Master of Magnetism</div>
+        <div class="villain-name">MAGNETO</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TEAMS -->
+<div class="section-divider" id="teams">
+  <h2>Teams</h2>
+  <div class="divider-line"></div>
+  <div class="divider-tag">Alliances</div>
+</div>
+
+<section class="teams-section">
+  <div class="teams-grid">
+    <div class="team-card">
+      <span class="team-icon">⚡</span>
+      <div class="team-name">The Avengers</div>
+      <p class="team-desc">Earth's mightiest heroes, assembled to protect the planet from threats too large for any single hero to handle.</p>
+      <div class="team-members">
+        <span class="member-chip">Iron Man</span>
+        <span class="member-chip">Captain America</span>
+        <span class="member-chip">Thor</span>
+        <span class="member-chip">Hulk</span>
+        <span class="member-chip">Black Widow</span>
+      </div>
+    </div>
+    <div class="team-card">
+      <span class="team-icon">⚔️</span>
+      <div class="team-name">X-Men</div>
+      <p class="team-desc">Homo superior — mutants gifted with extraordinary abilities, fighting for a world that fears and hates them.</p>
+      <div class="team-members">
+        <span class="member-chip">Wolverine</span>
+        <span class="member-chip">Cyclops</span>
+        <span class="member-chip">Storm</span>
+        <span class="member-chip">Jean Grey</span>
+        <span class="member-chip">Rogue</span>
+      </div>
+    </div>
+    <div class="team-card">
+      <span class="team-icon">🌌</span>
+      <div class="team-name">Guardians of the Galaxy</div>
+      <p class="team-desc">A ragtag team of cosmic misfits who inadvertently became the universe's most unlikely heroes.</p>
+      <div class="team-members">
+        <span class="member-chip">Star-Lord</span>
+        <span class="member-chip">Gamora</span>
+        <span class="member-chip">Drax</span>
+        <span class="member-chip">Rocket</span>
+        <span class="member-chip">Groot</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div>
+    <div class="footer-logo">MARVEL</div>
+    <div class="footer-tagline">Universe — Characters — Comics — Movies</div>
+  </div>
+  <ul class="footer-links">
+    <li><a href="#">Privacy</a></li>
+    <li><a href="#">Terms</a></li>
+    <li><a href="#">Accessibility</a></li>
+    <li><a href="#">Contact</a></li>
+  </ul>
+</footer>
+
+<div class="footer-bottom">
+  © 2024 MARVEL — All characters and their distinctive likenesses are property of Marvel Entertainment.
+</div>
+
+<!-- MODAL -->
+<div class="modal" id="modal">
+  <div class="modal-content">
+    <button class="modal-close" id="modalClose">✕</button>
+    <div class="modal-img-wrap">
+      <img class="modal-img" id="modalImg" src="" alt="">
+      <div class="modal-img-overlay"></div>
+    </div>
+    <div class="modal-info">
+      <div class="modal-team" id="modalTeam"></div>
+      <div class="modal-name" id="modalName"></div>
+      <div class="modal-alias" id="modalAlias"></div>
+      <p class="modal-bio" id="modalBio"></p>
+      <div class="modal-stats" id="modalStats"></div>
+      <div class="power-bars" id="modalPowers"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Cursor
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursorRing');
+let mx = 0, my = 0, rx = 0, ry = 0;
+
+document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+
+function animateCursor() {
+  cursor.style.left = mx + 'px';
+  cursor.style.top = my + 'px';
+  rx += (mx - rx) * 0.15;
+  ry += (my - ry) * 0.15;
+  ring.style.left = rx + 'px';
+  ring.style.top = ry + 'px';
+  requestAnimationFrame(animateCursor);
+}
+animateCursor();
+
+document.querySelectorAll('a, button, .char-card, .villain-card, .team-card').forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    cursor.style.transform = 'translate(-50%, -50%) scale(2)';
+    ring.style.transform = 'translate(-50%, -50%) scale(1.5)';
+    ring.style.opacity = '1';
+  });
+  el.addEventListener('mouseleave', () => {
+    cursor.style.transform = 'translate(-50%, -50%) scale(1)';
+    ring.style.transform = 'translate(-50%, -50%) scale(1)';
+    ring.style.opacity = '0.6';
+  });
+});
+
+// Characters Data
+const characters = [
+  {
+    name: 'SPIDER-MAN', alias: 'Peter Parker', team: 'Solo Hero', filter: 'solo',
+    img: 'https://i.annihil.us/u/prod/marvel/i/mg/3/50/526548a343e4b.jpg',
+    bio: 'Bitten by a radioactive spider, Peter Parker gained superhuman strength, agility, and a sixth sense for danger. His webbing and quick wit make him one of New York\'s greatest defenders.',
+    powers: 80, level: 7,
+    stats: [['85', 'Agility'], ['70', 'Strength'], ['95', 'Reflexes'], ['80', 'Intelligence']],
+    powerBars: [['Agility', 95], ['Strength', 72], ['Web-Slinging', 100], ['Intelligence', 82]]
+  },
+  {
+    name: 'CAPTAIN AMERICA', alias: 'Steve Rogers', team: 'Avengers', filter: 'avengers',
+    img: 'https://i.annihil.us/u/prod/marvel/i/mg/3/50/537ba56d31087.jpg',
+    bio: 'The Super-Soldier serum transformed a frail young man into the peak of human potential. A symbol of freedom and hope, Cap\'s greatest power is his unyielding will.',
+    powers: 75, level: 8,
+    stats: [['100', 'Leadership'], ['90', 'Strength'], ['95', 'Endurance'], ['70', 'Intelligence']],
+    powerBars: [['Strength', 88], ['Speed', 85], ['Endurance', 98], ['Leadership', 100]]
+  },
+  {
+    name: 'THOR', alias: 'Thor Odinson', team: 'Avengers', filter: 'avengers',
+    img: 'https://i.annihil.us/u/prod/marvel/i/mg/d/d0/5269657a74350.jpg',
+    bio: 'Son of Odin, God of Thunder, wielder of Mjolnir. Thor\'s divine heritage grants him vast power over storms, unmatched physical strength, and virtual immortality.',
+    powers: 95, level: 9,
+    stats: [['100', 'Strength'], ['90', 'Magic'], ['95', 'Durability'], ['75', 'Speed']],
+    powerBars: [['Strength', 100], ['Magic', 90], ['Durability', 95], ['Lightning', 100]]
+  },
+  {
+    name: 'WOLVERINE', alias: 'Logan', team: 'X-Men', filter: 'x-men',
+    img: 'https://i.annihil.us/u/prod/marvel/i/mg/2/60/537bcaef0f6cf.jpg',
+    bio: 'Bone claws laced with unbreakable adamantium, a healing factor that defies death, and over a century of combat experience. Logan is the best there is at what he does.',
+    powers: 85, level: 8,
+    stats: [['100', 'Healing'], ['90', 'Combat'], ['95', 'Endurance'], ['70', 'Agility']],
+    powerBars: [['Healing', 100], ['Combat', 95], ['Strength', 80], ['Agility', 75]]
+  },
+  {
+    name: 'BLACK WIDOW', alias: 'Natasha Romanoff', team: 'Avengers', filter: 'avengers',
+    img: 'https://i.annihil.us/u/prod/marvel/i/mg/f/30/50fecad1f395b.jpg',
+    bio: 'The deadliest spy in the world. Trained from childhood in the Red Room, Natasha Romanoff is a master of deception, combat, and manipulation with no superpowers — just unparalleled skill.',
+    powers: 60, level: 7,
+    stats: [['100', 'Espionage'], ['90', 'Combat'], ['85', 'Agility'], ['95', 'Intelligence']],
+    powerBars: [['Combat', 95], ['Espionage', 100], ['Agility', 90], ['Intelligence', 92]]
+  },
+  {
+    name: 'HULK', alias: 'Bruce Banner', team: 'Avengers', filter: 'avengers',
+    img: 'https://i.annihil.us/u/prod/marvel/i/mg/5/a0/538615ca33ab0.jpg',
+    bio: 'Exposed to gamma radiation, Dr. Bruce Banner transforms into an unstoppable behemoth of rage and raw power. The madder Hulk gets, the stronger Hulk gets — there is no theoretical upper limit.',
+    powers: 100, level: 9,
+    stats: [['100', 'Strength'], ['100', 'Durability'], ['40', 'Speed'], ['95', 'Rage']],
+    powerBars: [['Strength', 100], ['Durability', 100], ['Healing', 95], ['Rage', 100]]
+  },
+  {
+    name: 'DOCTOR STRANGE', alias: 'Stephen Strange', team: 'Solo Hero', filter: 'solo',
+    img: 'https://i.annihil.us/u/prod/marvel/i/mg/5/f0/5261a85a501fe.jpg',
+    bio: 'Sorcerer Supreme of the Earth dimension. A brilliant surgeon turned master of the mystic arts, Strange wields the power to bend reality itself and protect the world from magical threats.',
+    powers: 90, level: 8,
+    stats: [['100', 'Magic'], ['90', 'Mystic Arts'], ['85', 'Intelligence'], ['80', 'Wisdom']],
+    powerBars: [['Magic', 100], ['Time Manipulation', 95], ['Astral Form', 90], ['Intelligence', 90]]
+  },
+  {
+    name: 'BLACK PANTHER', alias: "T'Challa", team: 'Solo Hero', filter: 'solo',
+    img: 'https://i.annihil.us/u/prod/marvel/i/mg/6/60/5261a7d7a06db.jpg',
+    bio: "King of Wakanda and protector of his people. T'Challa's Vibranium suit and heart-shaped herb enhance him to peak-human perfection, while his tactical genius makes him the world's greatest warrior-king.",
+    powers: 80, level: 8,
+    stats: [['95', 'Combat'], ['90', 'Agility'], ['100', 'Intelligence'], ['95', 'Nobility']],
+    powerBars: [['Combat', 95], ['Agility', 90], ['Intelligence', 100], ['Leadership', 95]]
+  },
+];
+
+// Render characters
+const grid = document.getElementById('heroesGrid');
+characters.forEach((char, i) => {
+  const dots = Array.from({length: 10}, (_, j) => 
+    `<div class="power-dot ${j < Math.floor(char.powers / 10) ? '' : 'empty'}"></div>`
+  ).join('');
+
+  const card = document.createElement('div');
+  card.className = 'char-card';
+  card.dataset.filter = char.filter;
+  card.innerHTML = `
+    <img class="char-img" src="${char.img}" alt="${char.name}" 
+         onerror="this.src='https://via.placeholder.com/300x400/1a1a1a/333333?text=${encodeURIComponent(char.name)}'">
+    <div class="char-gradient"></div>
+    <div class="char-side-accent"></div>
+    <div class="char-number">${String(i+1).padStart(2,'0')}</div>
+    <div class="char-info">
+      <div class="char-team-tag">${char.team}</div>
+      <div class="char-name">${char.name}</div>
+      <div class="char-alias">${char.alias}</div>
+      <div class="char-power-peek">${dots}</div>
+    </div>
+  `;
+  card.addEventListener('click', () => openModal(char));
+  grid.appendChild(card);
+});
+
+// Filter
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const filter = btn.dataset.filter;
+    document.querySelectorAll('.char-card').forEach(card => {
+      if (filter === 'all' || card.dataset.filter === filter) {
+        card.style.display = '';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+  });
+});
+
+// Modal
+function openModal(char) {
+  document.getElementById('modalImg').src = char.img;
+  document.getElementById('modalImg').onerror = function() {
+    this.src = `https://via.placeholder.com/400x500/1a1a1a/333?text=${encodeURIComponent(char.name)}`;
+  };
+  document.getElementById('modalTeam').textContent = char.team;
+  document.getElementById('modalName').textContent = char.name;
+  document.getElementById('modalAlias').textContent = char.alias;
+  document.getElementById('modalBio').textContent = char.bio;
+  
+  document.getElementById('modalStats').innerHTML = char.stats.map(([val, label]) => `
+    <div class="modal-stat">
+      <div class="modal-stat-val">${val}</div>
+      <div class="modal-stat-label">${label}</div>
+    </div>
+  `).join('');
+
+  document.getElementById('modalPowers').innerHTML = char.powerBars.map(([name, val], i) => `
+    <div class="power-row">
+      <span class="power-name">${name}</span>
+      <div class="power-track">
+        <div class="power-fill" style="width:${val}%;animation-delay:${i*0.1}s"></div>
+      </div>
+      <span class="power-val">${val}</span>
+    </div>
+  `).join('');
+
+  document.getElementById('modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+document.getElementById('modalClose').addEventListener('click', () => {
+  document.getElementById('modal').classList.remove('open');
+  document.body.style.overflow = '';
+});
+
+document.getElementById('modal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) {
+    document.getElementById('modal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+});
+
+// Smooth scroll
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) target.scrollIntoView({behavior: 'smooth'});
+  });
+});
+</script>
+</body>
+</html>
